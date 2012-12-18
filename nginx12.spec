@@ -1,3 +1,4 @@
+%define packagename     nginx
 %define nginx_user      nginx
 %define nginx_group     %{nginx_user}
 %define nginx_home      %{_localstatedir}/lib/nginx
@@ -32,11 +33,11 @@ Provides: nginx = %{version}-%{release}
 Conflicts: nginx < 1.2.0
 
 Source0:    http://sysoev.ru/nginx/nginx-%{version}.tar.gz
-Source1:    %{name}.init
-Source2:    %{name}.logrotate
+Source1:    %{packagename}.init
+Source2:    %{packagename}.logrotate
 Source3:    virtual.conf
 Source4:    ssl.conf
-Source5:    %{name}.sysconfig
+Source5:    %{packagename}.sysconfig
 Source100:  index.html
 Source101:  poweredby.png
 Source102:  nginx-logo.png
@@ -56,7 +57,7 @@ Nginx [engine x] is an HTTP(S) server, HTTP(S) reverse proxy and IMAP/POP3
 proxy server written by Igor Sysoev.
 
 %prep
-%setup -q
+%setup -q -n %{packagename}-%{version}
 
 %patch0 -p0
 %patch1 -p0
@@ -72,15 +73,15 @@ export DESTDIR=%{buildroot}
     --user=%{nginx_user} \
     --group=%{nginx_group} \
     --prefix=%{nginx_datadir} \
-    --sbin-path=%{_sbindir}/%{name} \
-    --conf-path=%{nginx_confdir}/%{name}.conf \
+    --sbin-path=%{_sbindir}/%{packagename} \
+    --conf-path=%{nginx_confdir}/%{packagename}.conf \
     --error-log-path=%{nginx_logdir}/error.log \
     --http-log-path=%{nginx_logdir}/access.log \
     --http-client-body-temp-path=%{nginx_home_tmp}/client_body \
     --http-proxy-temp-path=%{nginx_home_tmp}/proxy \
     --http-fastcgi-temp-path=%{nginx_home_tmp}/fastcgi \
-    --pid-path=%{_localstatedir}/run/%{name}.pid \
-    --lock-path=%{_localstatedir}/lock/subsys/%{name} \
+    --pid-path=%{_localstatedir}/run/%{packagename}.pid \
+    --lock-path=%{_localstatedir}/lock/subsys/%{packagename} \
     --with-http_ssl_module \
     --with-http_realip_module \
     --with-http_addition_module \
@@ -107,9 +108,9 @@ find %{buildroot} -type f -empty -exec rm -f {} \;
 find %{buildroot} -type f -exec chmod 0644 {} \;
 find %{buildroot} -type f -name '*.so' -exec chmod 0755 {} \;
 chmod 0755 %{buildroot}%{_sbindir}/nginx
-%{__install} -p -D -m 0755 %{SOURCE1} %{buildroot}%{_initrddir}/%{name}
-%{__install} -p -D -m 0644 %{SOURCE2} %{buildroot}%{_sysconfdir}/logrotate.d/%{name}
-%{__install} -p -D -m 0644 %{SOURCE5} %{buildroot}%{_sysconfdir}/sysconfig/%{name}
+%{__install} -p -D -m 0755 %{SOURCE1} %{buildroot}%{_initrddir}/%{packagename}
+%{__install} -p -D -m 0644 %{SOURCE2} %{buildroot}%{_sysconfdir}/logrotate.d/%{packagename}
+%{__install} -p -D -m 0644 %{SOURCE5} %{buildroot}%{_sysconfdir}/sysconfig/%{packagename}
 %{__install} -p -d -m 0755 %{buildroot}%{nginx_confdir}/conf.d
 %{__install} -p -m 0644 %{SOURCE3} %{SOURCE4} %{buildroot}%{nginx_confdir}/conf.d
 %{__install} -p -d -m 0755 %{buildroot}%{nginx_home_tmp}
@@ -135,33 +136,33 @@ fi
 
 %post
 if [ $1 == 1 ]; then
-    /sbin/chkconfig --add %{name}
+    /sbin/chkconfig --add %{packagename}
 fi
 
 %preun
 if [ $1 = 0 ]; then
-    /sbin/service %{name} stop >/dev/null 2>&1
-    /sbin/chkconfig --del %{name}
+    /sbin/service %{packagename} stop >/dev/null 2>&1
+    /sbin/chkconfig --del %{packagename}
 fi
 
 %postun
 if [ $1 == 2 ]; then
-    /sbin/service %{name} upgrade || :
+    /sbin/service %{packagename} upgrade || :
 fi
 
 %files
 %defattr(-,root,root,-)
 %doc LICENSE CHANGES README
 %{nginx_datadir}/
-%{_sbindir}/%{name}
-%{_mandir}/man3/%{name}.3pm.gz
-%{_initrddir}/%{name}
+%{_sbindir}/%{packagename}
+%{_mandir}/man3/%{packagename}.3pm.gz
+%{_initrddir}/%{packagename}
 %dir %{nginx_confdir}
 %dir %{nginx_confdir}/conf.d
 %dir %{nginx_logdir}
 %config(noreplace) %{nginx_confdir}/conf.d/*.conf
 %config(noreplace) %{nginx_confdir}/win-utf
-%config(noreplace) %{nginx_confdir}/%{name}.conf.default
+%config(noreplace) %{nginx_confdir}/%{packagename}.conf.default
 %config(noreplace) %{nginx_confdir}/mime.types.default
 %config(noreplace) %{nginx_confdir}/fastcgi.conf
 %config(noreplace) %{nginx_confdir}/fastcgi.conf.default
@@ -173,13 +174,13 @@ fi
 %config(noreplace) %{nginx_confdir}/uwsgi_params.default
 %config(noreplace) %{nginx_confdir}/koi-win
 %config(noreplace) %{nginx_confdir}/koi-utf
-%config(noreplace) %{nginx_confdir}/%{name}.conf
+%config(noreplace) %{nginx_confdir}/%{packagename}.conf
 %config(noreplace) %{nginx_confdir}/mime.types
-%config(noreplace) %{_sysconfdir}/logrotate.d/%{name}
-%config(noreplace) %{_sysconfdir}/sysconfig/%{name}
-%dir %{perl_vendorarch}/auto/%{name}
-%{perl_vendorarch}/%{name}.pm
-%{perl_vendorarch}/auto/%{name}/%{name}.so
+%config(noreplace) %{_sysconfdir}/logrotate.d/%{packagename}
+%config(noreplace) %{_sysconfdir}/sysconfig/%{packagename}
+%dir %{perl_vendorarch}/auto/%{packagename}
+%{perl_vendorarch}/%{packagename}.pm
+%{perl_vendorarch}/auto/%{packagename}/%{packagename}.so
 %attr(-,%{nginx_user},%{nginx_group}) %dir %{nginx_home}
 %attr(-,%{nginx_user},%{nginx_group}) %dir %{nginx_home_tmp}
 
