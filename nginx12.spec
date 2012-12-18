@@ -28,6 +28,8 @@ Requires(post):     chkconfig
 # for /sbin/service
 Requires(preun):    chkconfig, initscripts
 Requires(postun):   initscripts
+Provides: nginx = %{version}-%{release}
+Conflicts: nginx < 1.2.0
 
 Source0:    http://sysoev.ru/nginx/nginx-%{version}.tar.gz
 Source1:    %{name}.init
