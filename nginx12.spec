@@ -9,7 +9,7 @@
 %define nginx_webroot   %{nginx_datadir}/html
 
 Name:           nginx12
-Version:        1.2.6
+Version:        1.2.9
 Release:        1%{?dist}
 Summary:        Robust, small and high performance http and reverse proxy server
 Group:          System Environment/Daemons   
@@ -186,6 +186,9 @@ fi
 
 
 %changelog
+* Sat May 18 2013 Andy Thompson <andy@webtatic.com> - 1.2.9-1
+- Update to 1.2.9
+
 * Tue Dec 18 2012 Andy Thompson <andy@webtatic.com> - 1.2.6-1
 - Fork nginx10 package
 - Rename to nginx12
