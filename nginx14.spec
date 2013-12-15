@@ -80,6 +80,8 @@ export DESTDIR=%{buildroot}
     --http-client-body-temp-path=%{nginx_home_tmp}/client_body \
     --http-proxy-temp-path=%{nginx_home_tmp}/proxy \
     --http-fastcgi-temp-path=%{nginx_home_tmp}/fastcgi \
+    --http-uwsgi-temp-path=%{nginx_home_tmp}/uwsgi \
+    --http-scgi-temp-path=%{nginx_home_tmp}/scgi \
     --pid-path=%{_localstatedir}/run/%{packagename}.pid \
     --lock-path=%{_localstatedir}/lock/subsys/%{packagename} \
     --with-http_ssl_module \
@@ -88,6 +90,8 @@ export DESTDIR=%{buildroot}
     --with-http_sub_module \
     --with-http_dav_module \
     --with-http_flv_module \
+    --with-http_mp4_module \
+    --with-http_gunzip_module \
     --with-http_gzip_static_module \
     --with-http_random_index_module \
     --with-http_secure_link_module \
@@ -95,6 +99,7 @@ export DESTDIR=%{buildroot}
     --with-http_perl_module \
     --with-mail \
     --with-mail_ssl_module \
+    --with-file-aio \
     --with-ipv6 \
     --with-cc-opt="%{optflags} $(pcre-config --cflags)"
 make %{?_smp_mflags} 
