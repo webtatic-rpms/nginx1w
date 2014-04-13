@@ -9,7 +9,7 @@
 %define nginx_webroot   %{nginx_datadir}/html
 
 Name:           nginx14
-Version:        1.4.4
+Version:        1.4.7
 Release:        1%{?dist}
 Summary:        Robust, small and high performance http and reverse proxy server
 Group:          System Environment/Daemons   
@@ -191,6 +191,9 @@ fi
 
 
 %changelog
+* Sun Apr 13 2014 Andy Thompson <andy@webtatic.com> - 1.4.7-1
+- Update to 1.4.7
+
 * Sun Dec 15 2013 Andy Thompson <andy@webtatic.com> - 1.4.4-1
 - Fork nginx12 package
 - Rename to nginx14
