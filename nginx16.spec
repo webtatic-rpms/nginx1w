@@ -87,6 +87,7 @@ export DESTDIR=%{buildroot}
     --with-http_ssl_module \
     --with-http_realip_module \
     --with-http_addition_module \
+    --with-http_auth_request_module \
     --with-http_sub_module \
     --with-http_dav_module \
     --with-http_flv_module \
@@ -95,6 +96,7 @@ export DESTDIR=%{buildroot}
     --with-http_gzip_static_module \
     --with-http_random_index_module \
     --with-http_secure_link_module \
+    --with-http_spdy_module \
     --with-http_stub_status_module \
     --with-http_perl_module \
     --with-mail \
@@ -195,3 +197,4 @@ fi
 - Fork nginx14 package
 - Rename to nginx16
 - Update to 1.6.0
+- Enable spdy and auth request modules
