@@ -50,7 +50,7 @@ Patch0:     nginx-auto-cc-gcc.patch
 
 # configuration patch to match all the Fedora paths for logs, pid files
 # etc.
-Patch1:     nginx-1.0.6-conf.patch
+Patch1:     nginx-1.6.0-conf.patch
 
 %description
 Nginx [engine x] is an HTTP(S) server, HTTP(S) reverse proxy and IMAP/POP3
@@ -60,7 +60,7 @@ proxy server written by Igor Sysoev.
 %setup -q -n %{packagename}-%{version}
 
 %patch0 -p0
-%patch1 -p0
+%patch1 -p1
 
 %build
 # nginx does not utilize a standard configure script.  It has its own
@@ -198,3 +198,4 @@ fi
 - Rename to nginx16
 - Update to 1.6.0
 - Enable spdy and auth request modules
+- Update conf patch to match upstream changes
