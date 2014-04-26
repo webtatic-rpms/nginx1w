@@ -8,8 +8,8 @@
 %define nginx_datadir   %{_datadir}/nginx
 %define nginx_webroot   %{nginx_datadir}/html
 
-Name:           nginx14
-Version:        1.4.7
+Name:           nginx16
+Version:        1.6.0
 Release:        1%{?dist}
 Summary:        Robust, small and high performance http and reverse proxy server
 Group:          System Environment/Daemons   
@@ -30,7 +30,7 @@ Requires(post):     chkconfig
 Requires(preun):    chkconfig, initscripts
 Requires(postun):   initscripts
 Provides: nginx = %{version}-%{release}
-Conflicts: nginx < 1.4.0
+Conflicts: nginx < 1.6.0
 
 Source0:    http://sysoev.ru/nginx/nginx-%{version}.tar.gz
 Source1:    %{packagename}.init
@@ -191,10 +191,7 @@ fi
 
 
 %changelog
-* Sun Apr 13 2014 Andy Thompson <andy@webtatic.com> - 1.4.7-1
-- Update to 1.4.7
-
-* Sun Dec 15 2013 Andy Thompson <andy@webtatic.com> - 1.4.4-1
-- Fork nginx12 package
-- Rename to nginx14
-- Update to 1.4.4
+* Sat Apr 26 2014 Andy Thompson <andy@webtatic.com> - 1.6.0-1
+- Fork nginx14 package
+- Rename to nginx16
+- Update to 1.6.0
