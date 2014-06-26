@@ -9,9 +9,13 @@
 %global  nginx_logdir        %{_localstatedir}/log/nginx
 %global  nginx_webroot       %{nginx_datadir}/html
 
+%if 0%{?fedora:1} || 0%{?rhel} >= 6
 # gperftools exist only on selected arches
 %ifarch %{ix86} x86_64 ppc ppc64 %{arm}
 %global  with_gperftools     1
+%endif
+
+%global  with_geoip          1
 %endif
 
 Name:              nginx16
@@ -45,7 +49,9 @@ Source104:         50x.html
 # -D_FORTIFY_SOURCE=2 causing warnings to turn into errors.
 Patch0:            nginx-auto-cc-gcc.patch
 
+%if 0%{?with_geoip}
 BuildRequires:     GeoIP-devel
+%endif
 BuildRequires:     gd-devel
 %if 0%{?with_gperftools}
 BuildRequires:     gperftools-devel
@@ -60,7 +66,9 @@ BuildRequires:     perl
 %endif
 BuildRequires:     perl(ExtUtils::Embed)
 BuildRequires:     zlib-devel
+%if 0%{?with_geoip}
 Requires:          GeoIP
+%endif
 Requires:          gd
 Requires:          openssl
 Requires:          pcre
@@ -128,7 +136,9 @@ export DESTDIR=%{buildroot}
     --with-http_auth_request_module \
     --with-http_xslt_module \
     --with-http_image_filter_module \
+%if 0%{?with_geoip}
     --with-http_geoip_module \
+%endif
     --with-http_sub_module \
     --with-http_dav_module \
     --with-http_flv_module \
@@ -279,6 +289,7 @@ fi
 %changelog
 * Thu Jun 26 2014 Andy Thompson <andy@webtatic.com> - 1.6.0-2
 - Update spec from upstream Fedora spec
+- Disable geoip and gperftools modules on EL5
 
 * Sat Apr 26 2014 Andy Thompson <andy@webtatic.com> - 1.6.0-1
 - Fork nginx14 package
