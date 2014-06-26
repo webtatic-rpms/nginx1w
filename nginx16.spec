@@ -191,6 +191,11 @@ install -p -d -m 0755 %{buildroot}%{nginx_webroot}
 
 install -p -m 0644 %{SOURCE12} \
     %{buildroot}%{nginx_confdir}
+%if 0%{?fedora} < 16 && 0%{?rhel} < 7
+sed -e 's:/run/nginx.pid:%{_localstatedir}/run/nginx.pid:' \
+    -i %{buildroot}%{nginx_confdir}/nginx.conf
+%endif
+
 install -p -m 0644 %{SOURCE100} \
     %{buildroot}%{nginx_webroot}
 install -p -m 0644 %{SOURCE101} %{SOURCE102} \
@@ -201,8 +206,10 @@ install -p -m 0644 %{SOURCE103} %{SOURCE104} \
 install -p -D -m 0644 %{_builddir}/nginx-%{version}/man/nginx.8 \
     %{buildroot}%{_mandir}/man8/nginx.8
 
+%if 0%{?fedora} >= 16 || 0%{?rhel} >= 7
 install -p -D -m 0755 %{SOURCE13} %{buildroot}%{_bindir}/nginx-upgrade
 install -p -D -m 0644 %{SOURCE14} %{buildroot}%{_mandir}/man8/nginx-upgrade.8
+%endif
 
 
 %pre
@@ -249,11 +256,15 @@ fi
 %files
 %doc LICENSE CHANGES README
 %{nginx_datadir}/
+%if 0%{?fedora} >= 16 || 0%{?rhel} >= 7
 %{_bindir}/nginx-upgrade
+%endif
 %{_sbindir}/nginx
 %{_mandir}/man3/nginx.3pm*
 %{_mandir}/man8/nginx.8*
+%if 0%{?fedora} >= 16 || 0%{?rhel} >= 7
 %{_mandir}/man8/nginx-upgrade.8*
+%endif
 %if 0%{?fedora} >= 16 || 0%{?rhel} >= 7
 %{_unitdir}/nginx.service
 %else
