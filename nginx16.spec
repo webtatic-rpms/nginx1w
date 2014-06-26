@@ -1,80 +1,108 @@
-%define packagename     nginx
-%define nginx_user      nginx
-%define nginx_group     %{nginx_user}
-%define nginx_home      %{_localstatedir}/lib/nginx
-%define nginx_home_tmp  %{nginx_home}/tmp
-%define nginx_logdir    %{_localstatedir}/log/nginx
-%define nginx_confdir   %{_sysconfdir}/nginx
-%define nginx_datadir   %{_datadir}/nginx
-%define nginx_webroot   %{nginx_datadir}/html
+%global  _hardened_build     1
+%global  packagename         nginx
+%global  nginx_user          nginx
+%global  nginx_group         %{nginx_user}
+%global  nginx_home          %{_localstatedir}/lib/nginx
+%global  nginx_home_tmp      %{nginx_home}/tmp
+%global  nginx_confdir       %{_sysconfdir}/nginx
+%global  nginx_datadir       %{_datadir}/nginx
+%global  nginx_logdir        %{_localstatedir}/log/nginx
+%global  nginx_webroot       %{nginx_datadir}/html
 
-Name:           nginx16
-Version:        1.6.0
-Release:        1%{?dist}
-Summary:        Robust, small and high performance http and reverse proxy server
-Group:          System Environment/Daemons   
+# gperftools exist only on selected arches
+%ifarch %{ix86} x86_64 ppc ppc64 %{arm}
+%global  with_gperftools     1
+%endif
 
+Name:              nginx16
+Version:           1.6.0
+Release:           2%{?dist}
+
+Summary:           A high performance web server and reverse proxy server
+Group:             System Environment/Daemons
 # BSD License (two clause)
 # http://www.freebsd.org/copyright/freebsd-license.html
-License:        BSD
-URL:            http://nginx.net/ 
-BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+License:           BSD
+URL:               http://nginx.org/
+BuildRoot:         %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
-BuildRequires:      pcre-devel,zlib-devel,openssl-devel,perl,perl(ExtUtils::Embed)
-Requires:           pcre,zlib,openssl
-Requires:           perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $version))
-# for /usr/sbin/useradd
-Requires(pre):      shadow-utils
-Requires(post):     chkconfig
-# for /sbin/service
-Requires(preun):    chkconfig, initscripts
-Requires(postun):   initscripts
-Provides: nginx = %{version}-%{release}
-Conflicts: nginx < 1.6.0
-
-Source0:    http://sysoev.ru/nginx/nginx-%{version}.tar.gz
-Source1:    %{packagename}.init
-Source2:    %{packagename}.logrotate
-Source3:    virtual.conf
-Source4:    ssl.conf
-Source5:    %{packagename}.sysconfig
-Source100:  index.html
-Source101:  poweredby.png
-Source102:  nginx-logo.png
-Source103:  50x.html
-Source104:  404.html
+Source0:           http://nginx.org/download/nginx-%{version}.tar.gz
+Source1:           http://nginx.org/download/nginx-%{version}.tar.gz.asc
+Source10:          nginx.service
+Source11:          nginx.logrotate
+Source12:          nginx.conf
+Source13:          nginx-upgrade
+Source14:          nginx-upgrade.8
+Source15:          nginx.init
+Source16:          nginx.sysconfig
+Source100:         index.html
+Source101:         poweredby.png
+Source102:         nginx-logo.png
+Source103:         404.html
+Source104:         50x.html
 
 # removes -Werror in upstream build scripts.  -Werror conflicts with
 # -D_FORTIFY_SOURCE=2 causing warnings to turn into errors.
-Patch0:     nginx-auto-cc-gcc.patch
+Patch0:            nginx-auto-cc-gcc.patch
 
-# configuration patch to match all the Fedora paths for logs, pid files
-# etc.
-Patch1:     nginx-1.6.0-conf.patch
+BuildRequires:     GeoIP-devel
+BuildRequires:     gd-devel
+%if 0%{?with_gperftools}
+BuildRequires:     gperftools-devel
+%endif
+BuildRequires:     libxslt-devel
+BuildRequires:     openssl-devel
+BuildRequires:     pcre-devel
+%if 0%{?fedora:1} || 0%{?rhel} >= 6
+BuildRequires:     perl-devel
+%else
+BuildRequires:     perl
+%endif
+BuildRequires:     perl(ExtUtils::Embed)
+BuildRequires:     zlib-devel
+Requires:          GeoIP
+Requires:          gd
+Requires:          openssl
+Requires:          pcre
+Requires:          perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $version))
+Requires(pre):     shadow-utils
+Provides:          webserver
+
+%if 0%{?fedora} >= 16 || 0%{?rhel} >= 7
+BuildRequires:     systemd
+Requires(post):    systemd
+Requires(preun):   systemd
+Requires(postun):  systemd
+%else
+Requires(post):    chkconfig
+Requires(preun):   chkconfig, initscripts
+Requires(postun):  initscripts
+%endif
+Provides: nginx = %{version}-%{release}
+Provides: nginx%{?_isa} = %{version}-%{release}
+Conflicts: nginx < 1.6.0
 
 %description
-Nginx [engine x] is an HTTP(S) server, HTTP(S) reverse proxy and IMAP/POP3
-proxy server written by Igor Sysoev.
+Nginx is a web server and a reverse proxy server for HTTP, SMTP, POP3 and
+IMAP protocols, with a strong focus on high concurrency, performance and low
+memory usage.
 
 %prep
 %setup -q -n %{packagename}-%{version}
 
 %patch0 -p0
-%patch1 -p1
+
 
 %build
 # nginx does not utilize a standard configure script.  It has its own
 # and the standard configure options cause the nginx configure script
 # to error out.  This is is also the reason for the DESTDIR environment
-# variable.  The configure script(s) have been patched (Patch1 and
-# Patch2) in order to support installing into a build environment.
+# variable.
 export DESTDIR=%{buildroot}
 ./configure \
-    --user=%{nginx_user} \
-    --group=%{nginx_group} \
     --prefix=%{nginx_datadir} \
-    --sbin-path=%{_sbindir}/%{packagename} \
-    --conf-path=%{nginx_confdir}/%{packagename}.conf \
+    --sbin-path=%{_sbindir}/nginx \
+    --conf-path=%{nginx_confdir}/nginx.conf \
     --error-log-path=%{nginx_logdir}/error.log \
     --http-log-path=%{nginx_logdir}/access.log \
     --http-client-body-temp-path=%{nginx_home_tmp}/client_body \
@@ -82,12 +110,25 @@ export DESTDIR=%{buildroot}
     --http-fastcgi-temp-path=%{nginx_home_tmp}/fastcgi \
     --http-uwsgi-temp-path=%{nginx_home_tmp}/uwsgi \
     --http-scgi-temp-path=%{nginx_home_tmp}/scgi \
-    --pid-path=%{_localstatedir}/run/%{packagename}.pid \
-    --lock-path=%{_localstatedir}/lock/subsys/%{packagename} \
+%if 0%{?fedora} >= 16 || 0%{?rhel} >= 7
+    --pid-path=/run/nginx.pid \
+    --lock-path=/run/lock/subsys/nginx \
+%else
+    --pid-path=%{_localstatedir}/run/nginx.pid \
+    --lock-path=%{_localstatedir}/lock/subsys/nginx \
+%endif
+    --user=%{nginx_user} \
+    --group=%{nginx_group} \
+    --with-file-aio \
+    --with-ipv6 \
     --with-http_ssl_module \
+    --with-http_spdy_module \
     --with-http_realip_module \
     --with-http_addition_module \
     --with-http_auth_request_module \
+    --with-http_xslt_module \
+    --with-http_image_filter_module \
+    --with-http_geoip_module \
     --with-http_sub_module \
     --with-http_dav_module \
     --with-http_flv_module \
@@ -96,103 +137,149 @@ export DESTDIR=%{buildroot}
     --with-http_gzip_static_module \
     --with-http_random_index_module \
     --with-http_secure_link_module \
-    --with-http_spdy_module \
+    --with-http_degradation_module \
     --with-http_stub_status_module \
     --with-http_perl_module \
     --with-mail \
     --with-mail_ssl_module \
-    --with-file-aio \
-    --with-ipv6 \
-    --with-cc-opt="%{optflags} $(pcre-config --cflags)"
-make %{?_smp_mflags} 
+    --with-pcre \
+%if 0%{?with_gperftools}
+    --with-google_perftools_module \
+%endif
+    --with-debug \
+    --with-cc-opt="%{optflags} $(pcre-config --cflags)" \
+    --with-ld-opt="$RPM_LD_FLAGS -Wl,-E" # so the perl module finds its symbols
+
+make %{?_smp_mflags}
+
 
 %install
-rm -rf %{buildroot}
 make install DESTDIR=%{buildroot} INSTALLDIRS=vendor
-find %{buildroot} -type f -name .packlist -exec rm -f {} \;
-find %{buildroot} -type f -name perllocal.pod -exec rm -f {} \;
-find %{buildroot} -type f -empty -exec rm -f {} \;
-find %{buildroot} -type f -exec chmod 0644 {} \;
-find %{buildroot} -type f -name '*.so' -exec chmod 0755 {} \;
-chmod 0755 %{buildroot}%{_sbindir}/nginx
-%{__install} -p -D -m 0755 %{SOURCE1} %{buildroot}%{_initrddir}/%{packagename}
-%{__install} -p -D -m 0644 %{SOURCE2} %{buildroot}%{_sysconfdir}/logrotate.d/%{packagename}
-%{__install} -p -D -m 0644 %{SOURCE5} %{buildroot}%{_sysconfdir}/sysconfig/%{packagename}
-%{__install} -p -d -m 0755 %{buildroot}%{nginx_confdir}/conf.d
-%{__install} -p -m 0644 %{SOURCE3} %{SOURCE4} %{buildroot}%{nginx_confdir}/conf.d
-%{__install} -p -d -m 0755 %{buildroot}%{nginx_home_tmp}
-%{__install} -p -d -m 0755 %{buildroot}%{nginx_logdir}
-%{__install} -p -d -m 0755 %{buildroot}%{nginx_webroot}
-%{__install} -p -m 0644 %{SOURCE100} %{SOURCE101} %{SOURCE102} %{SOURCE103} %{SOURCE104} %{buildroot}%{nginx_webroot}
 
-# convert to UTF-8 all files that give warnings.
-for textfile in CHANGES
-do
-    mv $textfile $textfile.old
-    iconv --from-code ISO8859-1 --to-code UTF-8 --output $textfile $textfile.old
-    rm -f $textfile.old
-done
+find %{buildroot} -type f -name .packlist -exec rm -f '{}' \;
+find %{buildroot} -type f -name perllocal.pod -exec rm -f '{}' \;
+find %{buildroot} -type f -empty -exec rm -f '{}' \;
+find %{buildroot} -type f -iname '*.so' -exec chmod 0755 '{}' \;
+%if 0%{?fedora} >= 16 || 0%{?rhel} >= 7
+install -p -D -m 0644 %{SOURCE10} \
+    %{buildroot}%{_unitdir}/nginx.service
+%else
+install -p -D -m 0755 %{SOURCE15} \
+    %{buildroot}%{_initrddir}/nginx
+install -p -D -m 0644 %{SOURCE16} \
+    %{buildroot}%{_sysconfdir}/sysconfig/nginx
+%endif
 
-%clean
-rm -rf %{buildroot}
+install -p -D -m 0644 %{SOURCE11} \
+    %{buildroot}%{_sysconfdir}/logrotate.d/nginx
+
+install -p -d -m 0755 %{buildroot}%{nginx_confdir}/conf.d
+install -p -d -m 0700 %{buildroot}%{nginx_home}
+install -p -d -m 0700 %{buildroot}%{nginx_home_tmp}
+install -p -d -m 0700 %{buildroot}%{nginx_logdir}
+install -p -d -m 0755 %{buildroot}%{nginx_webroot}
+
+install -p -m 0644 %{SOURCE12} \
+    %{buildroot}%{nginx_confdir}
+install -p -m 0644 %{SOURCE100} \
+    %{buildroot}%{nginx_webroot}
+install -p -m 0644 %{SOURCE101} %{SOURCE102} \
+    %{buildroot}%{nginx_webroot}
+install -p -m 0644 %{SOURCE103} %{SOURCE104} \
+    %{buildroot}%{nginx_webroot}
+
+install -p -D -m 0644 %{_builddir}/nginx-%{version}/man/nginx.8 \
+    %{buildroot}%{_mandir}/man8/nginx.8
+
+install -p -D -m 0755 %{SOURCE13} %{buildroot}%{_bindir}/nginx-upgrade
+install -p -D -m 0644 %{SOURCE14} %{buildroot}%{_mandir}/man8/nginx-upgrade.8
+
 
 %pre
-if [ $1 == 1 ]; then
-    %{_sbindir}/useradd -c "Nginx user" -s /bin/false -r -d %{nginx_home} %{nginx_user} 2>/dev/null || :
-fi
+getent group %{nginx_group} > /dev/null || groupadd -r %{nginx_group}
+getent passwd %{nginx_user} > /dev/null || \
+    useradd -r -d %{nginx_home} -g %{nginx_group} \
+    -s /sbin/nologin -c "Nginx web server" %{nginx_user}
+exit 0
 
 %post
-if [ $1 == 1 ]; then
+%if 0%{?fedora} >= 16 || 0%{?rhel} >= 7
+%systemd_post nginx.service
+%else
+if [ $1 -eq 1 ]; then
     /sbin/chkconfig --add %{packagename}
+fi
+%endif
+if [ $1 -eq 2 ]; then
+    # Make sure these directories are not world readable.
+    chmod 700 %{nginx_home}
+    chmod 700 %{nginx_home_tmp}
+    chmod 700 %{nginx_logdir}
 fi
 
 %preun
-if [ $1 = 0 ]; then
+%if 0%{?fedora} >= 16 || 0%{?rhel} >= 7
+%systemd_preun nginx.service
+%else
+if [ $1 -eq 0 ]; then
     /sbin/service %{packagename} stop >/dev/null 2>&1
     /sbin/chkconfig --del %{packagename}
 fi
+%endif
 
 %postun
-if [ $1 == 2 ]; then
+%if 0%{?fedora} >= 16 || 0%{?rhel} >= 7
+%systemd_postun nginx.service
+%else
+if [ $1 -eq 2 ]; then
     /sbin/service %{packagename} upgrade || :
 fi
+%endif
 
 %files
-%defattr(-,root,root,-)
 %doc LICENSE CHANGES README
 %{nginx_datadir}/
-%{_sbindir}/%{packagename}
-%{_mandir}/man3/%{packagename}.3pm.gz
-%{_initrddir}/%{packagename}
+%{_bindir}/nginx-upgrade
+%{_sbindir}/nginx
+%{_mandir}/man3/nginx.3pm*
+%{_mandir}/man8/nginx.8*
+%{_mandir}/man8/nginx-upgrade.8*
+%if 0%{?fedora} >= 16 || 0%{?rhel} >= 7
+%{_unitdir}/nginx.service
+%else
+%{_initrddir}/nginx
+%config(noreplace) %{_sysconfdir}/sysconfig/nginx
+%endif
 %dir %{nginx_confdir}
 %dir %{nginx_confdir}/conf.d
-%dir %{nginx_logdir}
-%config(noreplace) %{nginx_confdir}/conf.d/*.conf
-%config(noreplace) %{nginx_confdir}/win-utf
-%config(noreplace) %{nginx_confdir}/%{packagename}.conf.default
-%config(noreplace) %{nginx_confdir}/mime.types.default
 %config(noreplace) %{nginx_confdir}/fastcgi.conf
 %config(noreplace) %{nginx_confdir}/fastcgi.conf.default
 %config(noreplace) %{nginx_confdir}/fastcgi_params
 %config(noreplace) %{nginx_confdir}/fastcgi_params.default
+%config(noreplace) %{nginx_confdir}/koi-utf
+%config(noreplace) %{nginx_confdir}/koi-win
+%config(noreplace) %{nginx_confdir}/mime.types
+%config(noreplace) %{nginx_confdir}/mime.types.default
+%config(noreplace) %{nginx_confdir}/nginx.conf
+%config(noreplace) %{nginx_confdir}/nginx.conf.default
 %config(noreplace) %{nginx_confdir}/scgi_params
 %config(noreplace) %{nginx_confdir}/scgi_params.default
 %config(noreplace) %{nginx_confdir}/uwsgi_params
 %config(noreplace) %{nginx_confdir}/uwsgi_params.default
-%config(noreplace) %{nginx_confdir}/koi-win
-%config(noreplace) %{nginx_confdir}/koi-utf
-%config(noreplace) %{nginx_confdir}/%{packagename}.conf
-%config(noreplace) %{nginx_confdir}/mime.types
-%config(noreplace) %{_sysconfdir}/logrotate.d/%{packagename}
-%config(noreplace) %{_sysconfdir}/sysconfig/%{packagename}
-%dir %{perl_vendorarch}/auto/%{packagename}
-%{perl_vendorarch}/%{packagename}.pm
-%{perl_vendorarch}/auto/%{packagename}/%{packagename}.so
-%attr(-,%{nginx_user},%{nginx_group}) %dir %{nginx_home}
-%attr(-,%{nginx_user},%{nginx_group}) %dir %{nginx_home_tmp}
+%config(noreplace) %{nginx_confdir}/win-utf
+%config(noreplace) %{_sysconfdir}/logrotate.d/nginx
+%dir %{perl_vendorarch}/auto/nginx
+%{perl_vendorarch}/nginx.pm
+%{perl_vendorarch}/auto/nginx/nginx.so
+%attr(700,%{nginx_user},%{nginx_group}) %dir %{nginx_home}
+%attr(700,%{nginx_user},%{nginx_group}) %dir %{nginx_home_tmp}
+%attr(700,%{nginx_user},%{nginx_group}) %dir %{nginx_logdir}
 
 
 %changelog
+* Thu Jun 26 2014 Andy Thompson <andy@webtatic.com> - 1.6.0-2
+- Update spec from upstream Fedora spec
+
 * Sat Apr 26 2014 Andy Thompson <andy@webtatic.com> - 1.6.0-1
 - Fork nginx14 package
 - Rename to nginx16
