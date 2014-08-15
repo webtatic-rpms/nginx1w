@@ -19,8 +19,8 @@
 %endif
 
 Name:              nginx16
-Version:           1.6.0
-Release:           2%{?dist}
+Version:           1.6.1
+Release:           1%{?dist}
 
 Summary:           A high performance web server and reverse proxy server
 Group:             System Environment/Daemons
@@ -298,6 +298,9 @@ fi
 
 
 %changelog
+* Fri Aug 15 2014 Andy Thompson <andy@webtatic.com> - 1.6.1-1
+- Update to 1.6.1
+
 * Thu Jun 26 2014 Andy Thompson <andy@webtatic.com> - 1.6.0-2
 - Update spec from upstream Fedora spec
 - Disable geoip and gperftools modules on EL5
