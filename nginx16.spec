@@ -18,6 +18,13 @@
 %global  with_geoip          1
 %endif
 
+%if 0%{?fedora} >= 8 || 0%{?rhel} >= 6
+# AIO missing on some arches, and only supported with kernel >= 2.6.22
+%ifnarch aarch64
+%global  with_aio   1
+%endif
+%endif
+
 %if 0%{?fedora} >= 16 || 0%{?rhel} >= 7
 %global with_systemd 1
 %endif
@@ -131,7 +138,9 @@ export DESTDIR=%{buildroot}
 %endif
     --user=%{nginx_user} \
     --group=%{nginx_group} \
+%if 0%{?with_aio}
     --with-file-aio \
+%endif
     --with-ipv6 \
     --with-http_ssl_module \
     --with-http_spdy_module \
@@ -302,6 +311,7 @@ fi
 %changelog
 * Thu Oct 02 2014 Andy Thompson <andy@webtatic.com> - 1.6.1-2
 - Simplify systemd-dependent if conditions
+- Add aio support for > EL5
 
 * Fri Aug 15 2014 Andy Thompson <andy@webtatic.com> - 1.6.1-1
 - Update to 1.6.1
