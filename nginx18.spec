@@ -29,8 +29,8 @@
 %global with_systemd 1
 %endif
 
-Name:              nginx16
-Version:           1.6.3
+Name:              nginx18
+Version:           1.8.0
 Release:           1%{?dist}
 
 Summary:           A high performance web server and reverse proxy server
@@ -309,25 +309,6 @@ fi
 
 
 %changelog
-* Wed Apr 08 2015 Andy Thompson <andy@webtatic.com> - 1.6.3-1
-- Update to 1.6.3
-
-* Thu Oct 02 2014 Andy Thompson <andy@webtatic.com> - 1.6.2-1
-- Update to 1.6.2
-- Fixes CVE-2014-3616
-- Simplify systemd-dependent if conditions
-- Add aio support for > EL5
-
-* Fri Aug 15 2014 Andy Thompson <andy@webtatic.com> - 1.6.1-1
-- Update to 1.6.1
-
-* Thu Jun 26 2014 Andy Thompson <andy@webtatic.com> - 1.6.0-2
-- Update spec from upstream Fedora spec
-- Disable geoip and gperftools modules on EL5
-
-* Sat Apr 26 2014 Andy Thompson <andy@webtatic.com> - 1.6.0-1
-- Fork nginx14 package
-- Rename to nginx16
-- Update to 1.6.0
-- Enable spdy and auth request modules
-- Update conf patch to match upstream changes
+* Wed Apr 29 2015 Andy Thompson <andy@webtatic.com> - 1.8.0-1
+- Fork nginx16 package
+- Update to 1.8.0
