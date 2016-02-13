@@ -30,7 +30,7 @@
 %endif
 
 Name:              nginx18
-Version:           1.8.0
+Version:           1.8.1
 Release:           1%{?dist}
 
 Summary:           A high performance web server and reverse proxy server
@@ -309,6 +309,9 @@ fi
 
 
 %changelog
+* Sat Feb 13 2016 Andy Thompson <andy@webtatic.com> - 1.8.1-1
+- Update to 1.8.1
+
 * Wed Apr 29 2015 Andy Thompson <andy@webtatic.com> - 1.8.0-1
 - Fork nginx16 package
 - Update to 1.8.0
