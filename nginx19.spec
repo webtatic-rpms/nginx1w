@@ -143,7 +143,7 @@ export DESTDIR=%{buildroot}
 %endif
     --with-ipv6 \
     --with-http_ssl_module \
-    --with-http_spdy_module \
+    --with-http_v2_module \
     --with-http_realip_module \
     --with-http_addition_module \
     --with-http_auth_request_module \
@@ -311,3 +311,4 @@ fi
 %changelog
 * Sat Feb 13 2016 Andy Thompson <andy@webtatic.com> - 1.9.11-1
 - Fork nginx18 package
+- Replace spdy with http2 module
