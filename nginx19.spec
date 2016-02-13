@@ -166,6 +166,8 @@ export DESTDIR=%{buildroot}
     --with-http_slice_module \
     --with-mail=dynamic \
     --with-mail_ssl_module \
+    --with-stream=dynamic \
+    --with-stream_ssl_module \
     --with-threads \
     --with-pcre \
 %if 0%{?with_gperftools}
