@@ -163,8 +163,10 @@ export DESTDIR=%{buildroot}
     --with-http_degradation_module \
     --with-http_stub_status_module \
     --with-http_perl_module \
+    --with-http_slice_module \
     --with-mail=dynamic \
     --with-mail_ssl_module \
+    --with-threads \
     --with-pcre \
 %if 0%{?with_gperftools}
     --with-google_perftools_module \
