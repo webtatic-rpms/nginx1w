@@ -7,6 +7,7 @@
 %global  nginx_confdir       %{_sysconfdir}/nginx
 %global  nginx_datadir       %{_datadir}/nginx
 %global  nginx_logdir        %{_localstatedir}/log/nginx
+%global  nginx_moduledir     %{_libdir}/nginx/modules
 %global  nginx_webroot       %{nginx_datadir}/html
 
 %if 0%{?fedora} >= 17 || 0%{?rhel} >= 6
@@ -60,14 +61,9 @@ Source104:         50x.html
 # -D_FORTIFY_SOURCE=2 causing warnings to turn into errors.
 Patch0:            nginx-auto-cc-gcc.patch
 
-%if 0%{?with_geoip}
-BuildRequires:     GeoIP-devel
-%endif
-BuildRequires:     gd-devel
 %if 0%{?with_gperftools}
 BuildRequires:     gperftools-devel
 %endif
-BuildRequires:     libxslt-devel
 BuildRequires:     openssl-devel
 BuildRequires:     pcre-devel
 %if 0%{?fedora:1} || 0%{?rhel} >= 6
@@ -77,10 +73,6 @@ BuildRequires:     perl
 %endif
 BuildRequires:     perl(ExtUtils::Embed)
 BuildRequires:     zlib-devel
-%if 0%{?with_geoip}
-Requires:          GeoIP
-%endif
-Requires:          gd
 Requires:          openssl
 Requires:          pcre
 Requires:          perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $version))
@@ -101,10 +93,79 @@ Provides: nginx = %{version}-%{release}
 Provides: nginx%{?_isa} = %{version}-%{release}
 Conflicts: nginx < 1.6.0
 
+# Don't provides extensions, which are not shared library, as .so
+%{?filter_provides_in: %filter_provides_in %{nginx_moduledir}/.*\.so$}
+%{?filter_setup}
+
 %description
 Nginx is a web server and a reverse proxy server for HTTP, SMTP, POP3 and
 IMAP protocols, with a strong focus on high concurrency, performance and low
 memory usage.
+
+%if 0%{?with_geoip}
+%package http_geoip
+Summary: A module to provide variables with values depending on the client IP address
+Group:             System Environment/Daemons
+# BSD License (two clause)
+# http://www.freebsd.org/copyright/freebsd-license.html
+License:           BSD
+BuildRequires:     GeoIP-devel
+Requires:          %{name}%{?_isa} = %{version}-%{release}
+Requires:          GeoIP
+
+%description http_geoip
+The ngx_http_geoip_module module creates variables with values depending on the
+client IP address, using the precompiled MaxMind databases.
+%endif
+
+%package http_image_filter
+Summary: A module to transform images
+Group:             System Environment/Daemons
+# BSD License (two clause)
+# http://www.freebsd.org/copyright/freebsd-license.html
+License:           BSD
+BuildRequires:     gd-devel
+Requires:          gd
+Requires:          %{name}%{?_isa} = %{version}-%{release}
+
+%description http_image_filter
+The ngx_http_image_filter_module module is a filter that transforms images in
+JPEG, GIF, and PNG formats.
+
+%package http_xslt
+Summary: A module to transform XML responses using XSLT stylesheets
+Group:             System Environment/Daemons
+# BSD License (two clause)
+# http://www.freebsd.org/copyright/freebsd-license.html
+License:           BSD
+BuildRequires:     libxslt-devel
+Requires:          %{name}%{?_isa} = %{version}-%{release}
+
+%description http_xslt
+The ngx_http_xslt_module is a filter that transforms XML responses using one or
+more XSLT stylesheets.
+
+%package mail
+Summary: A collection of modules for serving a mail proxy
+Group:             System Environment/Daemons
+# BSD License (two clause)
+# http://www.freebsd.org/copyright/freebsd-license.html
+License:           BSD
+Requires:          %{name}%{?_isa} = %{version}-%{release}
+
+%description mail
+A collection of modules for serving a mail proxy.
+
+%package stream
+Summary: A collection of modules for serving a stream proxy
+Group:             System Environment/Daemons
+# BSD License (two clause)
+# http://www.freebsd.org/copyright/freebsd-license.html
+License:           BSD
+Requires:          %{name}%{?_isa} = %{version}-%{release}
+
+%description stream
+A collection of modules for serving a stream proxy.
 
 %prep
 %setup -q -n %{packagename}-%{version}
@@ -129,6 +190,7 @@ export DESTDIR=%{buildroot}
     --http-fastcgi-temp-path=%{nginx_home_tmp}/fastcgi \
     --http-uwsgi-temp-path=%{nginx_home_tmp}/uwsgi \
     --http-scgi-temp-path=%{nginx_home_tmp}/scgi \
+    --modules-path=%{nginx_moduledir} \
 %if 0%{?with_systemd}
     --pid-path=/run/nginx.pid \
     --lock-path=/run/lock/subsys/nginx \
@@ -201,10 +263,26 @@ install -p -D -m 0644 %{SOURCE11} \
     %{buildroot}%{_sysconfdir}/logrotate.d/nginx
 
 install -p -d -m 0755 %{buildroot}%{nginx_confdir}/conf.d
+install -p -d -m 0755 %{buildroot}%{nginx_confdir}/conf.modules.d
 install -p -d -m 0700 %{buildroot}%{nginx_home}
 install -p -d -m 0700 %{buildroot}%{nginx_home_tmp}
 install -p -d -m 0700 %{buildroot}%{nginx_logdir}
 install -p -d -m 0755 %{buildroot}%{nginx_webroot}
+
+for mod in http_image_filter http_xslt_filter mail stream \
+%if 0%{?with_geoip}
+    http_geoip \
+%endif
+    ; do
+    cat > %{buildroot}%{nginx_confdir}/conf.modules.d/20-ngx_${mod}_module.conf <<EOF
+load_module "%{nginx_moduledir}/ngx_${mod}_module.so";
+EOF
+
+    cat > files.${mod} <<EOF
+%attr(755,root,root) %{nginx_moduledir}/ngx_${mod}_module.so
+%config(noreplace) %attr(644,root,root) %{nginx_confdir}/conf.modules.d/20-ngx_${mod}_module.conf
+EOF
+done
 
 install -p -m 0644 %{SOURCE12} \
     %{buildroot}%{nginx_confdir}
@@ -311,6 +389,13 @@ fi
 %attr(700,%{nginx_user},%{nginx_group}) %dir %{nginx_home_tmp}
 %attr(700,%{nginx_user},%{nginx_group}) %dir %{nginx_logdir}
 
+%if 0%{?with_geoip}
+%files http_geoip -f files.http_geoip
+%endif
+%files http_image_filter -f files.http_image_filter
+%files http_xslt -f files.http_xslt_filter
+%files mail -f files.mail
+%files stream -f files.stream
 
 %changelog
 * Sat Feb 13 2016 Andy Thompson <andy@webtatic.com> - 1.9.11-1
