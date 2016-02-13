@@ -1,4 +1,4 @@
-name: nginx18
+name: nginx19
 builds:
   webtatic-el7:
     target: el7-development
