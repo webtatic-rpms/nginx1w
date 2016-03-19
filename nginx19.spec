@@ -108,7 +108,7 @@ IMAP protocols, with a strong focus on high concurrency, performance and low
 memory usage.
 
 %if 0%{?with_geoip}
-%package http_geoip
+%package module-http_geoip
 Summary: A module to provide variables with values depending on the client IP address
 Group:             System Environment/Daemons
 # BSD License (two clause)
@@ -118,12 +118,12 @@ BuildRequires:     GeoIP-devel
 Requires:          %{name}%{?_isa} = %{version}-%{release}
 Requires:          GeoIP
 
-%description http_geoip
+%description module-http_geoip
 The ngx_http_geoip_module module creates variables with values depending on the
 client IP address, using the precompiled MaxMind databases.
 %endif
 
-%package http_image_filter
+%package module-http_image_filter
 Summary: A module to transform images
 Group:             System Environment/Daemons
 # BSD License (two clause)
@@ -133,11 +133,11 @@ BuildRequires:     gd-devel
 Requires:          gd
 Requires:          %{name}%{?_isa} = %{version}-%{release}
 
-%description http_image_filter
+%description module-http_image_filter
 The ngx_http_image_filter_module module is a filter that transforms images in
 JPEG, GIF, and PNG formats.
 
-%package http_xslt
+%package module-http_xslt
 Summary: A module to transform XML responses using XSLT stylesheets
 Group:             System Environment/Daemons
 # BSD License (two clause)
@@ -146,11 +146,11 @@ License:           BSD
 BuildRequires:     libxslt-devel
 Requires:          %{name}%{?_isa} = %{version}-%{release}
 
-%description http_xslt
+%description module-http_xslt
 The ngx_http_xslt_module is a filter that transforms XML responses using one or
 more XSLT stylesheets.
 
-%package mail
+%package module-mail
 Summary: A collection of modules for serving a mail proxy
 Group:             System Environment/Daemons
 # BSD License (two clause)
@@ -158,10 +158,10 @@ Group:             System Environment/Daemons
 License:           BSD
 Requires:          %{name}%{?_isa} = %{version}-%{release}
 
-%description mail
+%description module-mail
 A collection of modules for serving a mail proxy.
 
-%package stream
+%package module-stream
 Summary: A collection of modules for serving a stream proxy
 Group:             System Environment/Daemons
 # BSD License (two clause)
@@ -169,7 +169,7 @@ Group:             System Environment/Daemons
 License:           BSD
 Requires:          %{name}%{?_isa} = %{version}-%{release}
 
-%description stream
+%description module-stream
 A collection of modules for serving a stream proxy.
 
 %if 0%{?with_pagespeed}
@@ -180,8 +180,8 @@ Group:             System Environment/Daemons
 # http://www.freebsd.org/copyright/freebsd-license.html
 License:           BSD
 Requires:          %{name}%{?_isa} = %{version}-%{release}
-Provides: %{name}-pagespeed = %{pagespeed_version}-%{release}
-Provides: %{name}-pagespeed%{?_isa} = %{pagespeed_version}-%{release}
+Provides: %{name}-module-pagespeed = %{pagespeed_version}-%{release}
+Provides: %{name}-module-pagespeed%{?_isa} = %{pagespeed_version}-%{release}
 
 %description ext-pagespeed
 ngx_pagespeed speeds up your site and reduces page load time by
@@ -431,12 +431,12 @@ fi
 %attr(700,%{nginx_user},%{nginx_group}) %dir %{nginx_logdir}
 
 %if 0%{?with_geoip}
-%files http_geoip -f files.http_geoip
+%files module-http_geoip -f files.http_geoip
 %endif
-%files http_image_filter -f files.http_image_filter
-%files http_xslt -f files.http_xslt_filter
-%files mail -f files.mail
-%files stream -f files.stream
+%files module-http_image_filter -f files.http_image_filter
+%files module-http_xslt -f files.http_xslt_filter
+%files module-mail -f files.mail
+%files module-stream -f files.stream
 %if 0%{?with_pagespeed}
 %files ext-pagespeed -f files.pagespeed
 %endif
