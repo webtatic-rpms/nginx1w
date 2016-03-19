@@ -31,8 +31,8 @@
 %endif
 
 Name:              nginx19
-Version:           1.9.11
-Release:           1%{?dist}
+Version:           1.9.12
+Release:           0.1%{?dist}
 
 Summary:           A high performance web server and reverse proxy server
 Group:             System Environment/Daemons
@@ -398,6 +398,7 @@ fi
 %files stream -f files.stream
 
 %changelog
-* Sat Feb 13 2016 Andy Thompson <andy@webtatic.com> - 1.9.11-1
+* Sat Mar 19 2016 Andy Thompson <andy@webtatic.com> - 1.9.12-0.1
 - Fork nginx18 package
 - Replace spdy with http2 module
+- Update to 1.9.12
