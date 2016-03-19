@@ -27,8 +27,11 @@
 %endif
 
 %if 0%{?fedora} >= 16 || 0%{?rhel} >= 7
-%global with_systemd 1
+%global  with_systemd 1
+%global  with_pagespeed      1
 %endif
+
+%global  pagespeed_version   1.10.33.5
 
 Name:              nginx19
 Version:           1.9.12
@@ -44,6 +47,8 @@ BuildRoot:         %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n
 
 Source0:           http://nginx.org/download/nginx-%{version}.tar.gz
 Source1:           http://nginx.org/download/nginx-%{version}.tar.gz.asc
+Source2:           https://github.com/pagespeed/ngx_pagespeed/archive/release-%{pagespeed_version}-beta.zip
+Source3:           https://dl.google.com/dl/page-speed/psol/%{pagespeed_version}.tar.gz
 Source10:          nginx.service
 Source11:          nginx.logrotate
 Source12:          nginx.conf
@@ -167,11 +172,36 @@ Requires:          %{name}%{?_isa} = %{version}-%{release}
 %description stream
 A collection of modules for serving a stream proxy.
 
+%if 0%{?with_pagespeed}
+%package ext-pagespeed
+Summary: Automatic PageSpeed optimization module
+Group:             System Environment/Daemons
+# BSD License (two clause)
+# http://www.freebsd.org/copyright/freebsd-license.html
+License:           BSD
+Requires:          %{name}%{?_isa} = %{version}-%{release}
+Provides: %{name}-pagespeed = %{pagespeed_version}-%{release}
+Provides: %{name}-pagespeed%{?_isa} = %{pagespeed_version}-%{release}
+
+%description ext-pagespeed
+ngx_pagespeed speeds up your site and reduces page load time by
+automatically applying web performance best practices to pages and
+associated assets (CSS, JavaScript, images) without requiring you to
+modify your existing content or workflow.
+%endif
+
 %prep
 %setup -q -n %{packagename}-%{version}
-
 %patch0 -p0
 
+%if 0%{?with_pagespeed}
+
+%setup -q -n %{packagename}-%{version} -T -D -a 2
+pushd ngx_pagespeed-release-%{pagespeed_version}-beta
+tar -xzf %{SOURCE3}
+popd
+
+%endif
 
 %build
 # nginx does not utilize a standard configure script.  It has its own
@@ -235,6 +265,9 @@ export DESTDIR=%{buildroot}
 %if 0%{?with_gperftools}
     --with-google_perftools_module \
 %endif
+%if 0%{?with_pagespeed}
+    --add-dynamic-module=./ngx_pagespeed-release-%{pagespeed_version}-beta \
+%endif
     --with-debug \
     --with-cc-opt="%{optflags} $(pcre-config --cflags)" \
     --with-ld-opt="$RPM_LD_FLAGS -Wl,-E" # so the perl module finds its symbols
@@ -273,14 +306,22 @@ for mod in http_image_filter http_xslt_filter mail stream \
 %if 0%{?with_geoip}
     http_geoip \
 %endif
+%if 0%{?with_pagespeed}
+    pagespeed \
+%endif
     ; do
-    cat > %{buildroot}%{nginx_confdir}/conf.modules.d/20-ngx_${mod}_module.conf <<EOF
-load_module "%{nginx_moduledir}/ngx_${mod}_module.so";
+    if [ "$mod" = "pagespeed" ]; then
+        soname="ngx_${mod}"
+    else
+        soname="ngx_${mod}_module"
+    fi
+    cat > %{buildroot}%{nginx_confdir}/conf.modules.d/20-${soname}.conf <<EOF
+load_module "%{nginx_moduledir}/${soname}.so";
 EOF
 
     cat > files.${mod} <<EOF
-%attr(755,root,root) %{nginx_moduledir}/ngx_${mod}_module.so
-%config(noreplace) %attr(644,root,root) %{nginx_confdir}/conf.modules.d/20-ngx_${mod}_module.conf
+%attr(755,root,root) %{nginx_moduledir}/${soname}.so
+%config(noreplace) %attr(644,root,root) %{nginx_confdir}/conf.modules.d/20-${soname}.conf
 EOF
 done
 
@@ -396,6 +437,9 @@ fi
 %files http_xslt -f files.http_xslt_filter
 %files mail -f files.mail
 %files stream -f files.stream
+%if 0%{?with_pagespeed}
+%files ext-pagespeed -f files.pagespeed
+%endif
 
 %changelog
 * Sat Mar 19 2016 Andy Thompson <andy@webtatic.com> - 1.9.12-0.1
