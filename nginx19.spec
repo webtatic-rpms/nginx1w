@@ -34,7 +34,7 @@
 %global  pagespeed_version   1.10.33.5
 
 Name:              nginx19
-Version:           1.9.12
+Version:           1.9.14
 Release:           0.1%{?dist}
 
 Summary:           A high performance web server and reverse proxy server
@@ -442,6 +442,9 @@ fi
 %endif
 
 %changelog
+* Sat Apr 16 2016 Andy Thompson <andy@webtatic.com> - 1.9.14-0.1
+- Update to 1.9.14
+
 * Sat Mar 19 2016 Andy Thompson <andy@webtatic.com> - 1.9.12-0.1
 - Fork nginx18 package
 - Replace spdy with http2 module
