@@ -26,11 +26,14 @@
 %endif
 %endif
 
+%global  with_headers_more   1
+
 %if 0%{?fedora} >= 16 || 0%{?rhel} >= 7
 %global  with_systemd 1
 %global  with_pagespeed      1
 %endif
 
+%global  headers_more_version 0.30
 %global  pagespeed_version   1.10.33.5
 
 Name:              nginx110
@@ -47,8 +50,9 @@ BuildRoot:         %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n
 
 Source0:           http://nginx.org/download/nginx-%{version}.tar.gz
 Source1:           http://nginx.org/download/nginx-%{version}.tar.gz.asc
-Source2:           https://github.com/pagespeed/ngx_pagespeed/archive/release-%{pagespeed_version}-beta.zip
-Source3:           https://dl.google.com/dl/page-speed/psol/%{pagespeed_version}.tar.gz
+Source2:           https://github.com/openresty/headers-more-nginx-module/archive/v%{headers_more_version}.tar.gz
+Source3:           https://github.com/pagespeed/ngx_pagespeed/archive/release-%{pagespeed_version}-beta.zip
+Source4:           https://dl.google.com/dl/page-speed/psol/%{pagespeed_version}.tar.gz
 Source10:          nginx.service
 Source11:          nginx.logrotate
 Source12:          nginx.conf
@@ -173,6 +177,22 @@ Requires:          %{name}%{?_isa} = %{version}-%{release}
 %description module-stream
 A collection of modules for serving a stream proxy.
 
+%if 0%{?with_headers_more}
+%package ext-headers_more
+Summary: Set and clear input and output headers...more than "add"!
+Group:             System Environment/Daemons
+# BSD License (two clause)
+# http://www.freebsd.org/copyright/freebsd-license.html
+License:           BSD
+Requires:          %{name}%{?_isa} = %{version}-%{release}
+Provides: %{name}-module-headers_more = %{headers_more_version}-%{release}
+Provides: %{name}-module-headers_more%{?_isa} = %{headers_more_version}-%{release}
+
+%description ext-headers_more
+ngx_headers_more allows you to add, set, or clear any output or input
+header that you specify.
+%endif
+
 %if 0%{?with_pagespeed}
 %package ext-pagespeed
 Summary: Automatic PageSpeed optimization module
@@ -196,11 +216,17 @@ modify your existing content or workflow.
 %patch0 -p0
 %patch1 -p0
 
-%if 0%{?with_pagespeed}
+%if 0%{?with_headers_more}
 
 %setup -q -n %{packagename}-%{version} -T -D -a 2
+
+%endif
+
+%if 0%{?with_pagespeed}
+
+%setup -q -n %{packagename}-%{version} -T -D -a 3
 pushd ngx_pagespeed-release-%{pagespeed_version}-beta
-tar -xzf %{SOURCE3}
+tar -xzf %{SOURCE4}
 popd
 
 %endif
@@ -268,6 +294,9 @@ export DESTDIR=%{buildroot}
 %if 0%{?with_gperftools}
     --with-google_perftools_module \
 %endif
+%if 0%{?with_headers_more}
+    --add-dynamic-module=./headers-more-nginx-module-%{headers_more_version} \
+%endif
 %if 0%{?with_pagespeed}
     --add-dynamic-module=./ngx_pagespeed-release-%{pagespeed_version}-beta \
 %endif
@@ -311,6 +340,9 @@ for mod in http_image_filter http_xslt_filter mail stream \
 %endif
 %if 0%{?with_pagespeed}
     pagespeed \
+%endif
+%if 0%{?with_headers_more}
+    http_headers_more_filter \
 %endif
     ; do
     if [ "$mod" = "pagespeed" ]; then
@@ -440,6 +472,9 @@ fi
 %files module-http_xslt -f files.http_xslt_filter
 %files module-mail -f files.mail
 %files module-stream -f files.stream
+%if 0%{?with_headers_more}
+%files ext-headers_more -f files.http_headers_more_filter
+%endif
 %if 0%{?with_pagespeed}
 %files ext-pagespeed -f files.pagespeed
 %endif
@@ -450,3 +485,5 @@ fi
 - Extract modules supporting dynamic loading to additional packages
 - Update to 1.10.1
 - Patch nginx to add back in spdy support
+- Add headers_more dynamic module
+- Add pagespeed dynamic module
