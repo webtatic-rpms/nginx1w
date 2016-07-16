@@ -65,6 +65,7 @@ Source104:         50x.html
 # removes -Werror in upstream build scripts.  -Werror conflicts with
 # -D_FORTIFY_SOURCE=2 causing warnings to turn into errors.
 Patch0:            nginx-auto-cc-gcc.patch
+Patch1:            nginx__http2_spdy.patch
 
 %if 0%{?with_gperftools}
 BuildRequires:     gperftools-devel
@@ -193,6 +194,7 @@ modify your existing content or workflow.
 %prep
 %setup -q -n %{packagename}-%{version}
 %patch0 -p0
+%patch1 -p0
 
 %if 0%{?with_pagespeed}
 
@@ -234,6 +236,7 @@ export DESTDIR=%{buildroot}
     --with-file-aio \
 %endif
     --with-ipv6 \
+    --with-http_spdy_module \
     --with-http_ssl_module \
     --with-http_v2_module \
     --with-http_realip_module \
@@ -444,6 +447,6 @@ fi
 %changelog
 * Tue Jun 21 2016 Andy Thompson <andy@webtatic.com> - 1.10.1-0.1
 - Fork nginx18 package
-- Replace spdy with http2 module
 - Extract modules supporting dynamic loading to additional packages
 - Update to 1.10.1
+- Patch nginx to add back in spdy support
