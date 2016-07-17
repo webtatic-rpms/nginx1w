@@ -106,7 +106,7 @@ IMAP protocols, with a strong focus on high concurrency, performance and low
 memory usage.
 
 %if 0%{?with_geoip}
-%package module-http_geoip
+%package module-http-geoip
 Summary: A module to provide variables with values depending on the client IP address
 Group:             System Environment/Daemons
 # BSD License (two clause)
@@ -115,13 +115,15 @@ License:           BSD
 BuildRequires:     GeoIP-devel
 Requires:          %{name}%{?_isa} = %{version}-%{release}
 Requires:          GeoIP
+Provides:          %{name}-module(http_geoip) = %{version}-%{release}
+Provides:          %{name}-module(http_geoip)%{?_isa} = %{version}-%{release}
 
-%description module-http_geoip
+%description module-http-geoip
 The ngx_http_geoip_module module creates variables with values depending on the
 client IP address, using the precompiled MaxMind databases.
 %endif
 
-%package module-http_image_filter
+%package module-http-image-filter
 Summary: A module to transform images
 Group:             System Environment/Daemons
 # BSD License (two clause)
@@ -130,12 +132,14 @@ License:           BSD
 BuildRequires:     gd-devel
 Requires:          gd
 Requires:          %{name}%{?_isa} = %{version}-%{release}
+Provides:          %{name}-module(http_image_filter) = %{version}-%{release}
+Provides:          %{name}-module(http_image_filter)%{?_isa} = %{version}-%{release}
 
-%description module-http_image_filter
+%description module-http-image-filter
 The ngx_http_image_filter_module module is a filter that transforms images in
 JPEG, GIF, and PNG formats.
 
-%package module-http_perl
+%package module-http-perl
 Summary: A module to provide perl integration
 Group:             System Environment/Daemons
 # BSD License (two clause)
@@ -149,12 +153,14 @@ BuildRequires:     perl
 BuildRequires:     perl(ExtUtils::Embed)
 Requires:          %{name}%{?_isa} = %{version}-%{release}
 Requires:          perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $version))
+Provides:          %{name}-module(http_perl) = %{version}-%{release}
+Provides:          %{name}-module(http_perl)%{?_isa} = %{version}-%{release}
 
-%description module-http_perl
+%description module-http-perl
 The ngx_http_perl_module module is used to implement location and variable
 handlers in Perl and insert Perl calls into SSI.
 
-%package module-http_xslt
+%package module-http-xslt
 Summary: A module to transform XML responses using XSLT stylesheets
 Group:             System Environment/Daemons
 # BSD License (two clause)
@@ -162,8 +168,10 @@ Group:             System Environment/Daemons
 License:           BSD
 BuildRequires:     libxslt-devel
 Requires:          %{name}%{?_isa} = %{version}-%{release}
+Provides:          %{name}-module(http_xslt_filter) = %{version}-%{release}
+Provides:          %{name}-module(http_xslt_filter)%{?_isa} = %{version}-%{release}
 
-%description module-http_xslt
+%description module-http-xslt
 The ngx_http_xslt_module is a filter that transforms XML responses using one or
 more XSLT stylesheets.
 
@@ -174,6 +182,8 @@ Group:             System Environment/Daemons
 # http://www.freebsd.org/copyright/freebsd-license.html
 License:           BSD
 Requires:          %{name}%{?_isa} = %{version}-%{release}
+Provides:          %{name}-module(mail) = %{version}-%{release}
+Provides:          %{name}-module(mail)%{?_isa} = %{version}-%{release}
 
 %description module-mail
 A collection of modules for serving a mail proxy.
@@ -185,38 +195,42 @@ Group:             System Environment/Daemons
 # http://www.freebsd.org/copyright/freebsd-license.html
 License:           BSD
 Requires:          %{name}%{?_isa} = %{version}-%{release}
+Provides:          %{name}-module(stream) = %{version}-%{release}
+Provides:          %{name}-module(stream)%{?_isa} = %{version}-%{release}
 
 %description module-stream
 A collection of modules for serving a stream proxy.
 
 %if 0%{?with_headers_more}
-%package ext-headers_more
+%package module-headers-more
 Summary: Set and clear input and output headers...more than "add"!
 Group:             System Environment/Daemons
 # BSD License (two clause)
 # http://www.freebsd.org/copyright/freebsd-license.html
 License:           BSD
 Requires:          %{name}%{?_isa} = %{version}-%{release}
-Provides: %{name}-module-headers_more = %{headers_more_version}-%{release}
-Provides: %{name}-module-headers_more%{?_isa} = %{headers_more_version}-%{release}
+Provides:          %{name}-module(http_headers_more_filter) = %{version}-%{release}
+Provides:          %{name}-module(http_headers_more_filter)%{?_isa} = %{version}-%{release}
 
-%description ext-headers_more
+
+%description module-headers-more
 ngx_headers_more allows you to add, set, or clear any output or input
 header that you specify.
 %endif
 
 %if 0%{?with_pagespeed}
-%package ext-pagespeed
+%package module-pagespeed
 Summary: Automatic PageSpeed optimization module
 Group:             System Environment/Daemons
 # BSD License (two clause)
 # http://www.freebsd.org/copyright/freebsd-license.html
 License:           BSD
 Requires:          %{name}%{?_isa} = %{version}-%{release}
-Provides: %{name}-module-pagespeed = %{pagespeed_version}-%{release}
-Provides: %{name}-module-pagespeed%{?_isa} = %{pagespeed_version}-%{release}
+Provides:          %{name}-module(pagespeed) = %{version}-%{release}
+Provides:          %{name}-module(pagespeed)%{?_isa} = %{version}-%{release}
 
-%description ext-pagespeed
+
+%description module-pagespeed
 ngx_pagespeed speeds up your site and reduces page load time by
 automatically applying web performance best practices to pages and
 associated assets (CSS, JavaScript, images) without requiring you to
@@ -478,18 +492,18 @@ fi
 %attr(700,%{nginx_user},%{nginx_group}) %dir %{nginx_logdir}
 
 %if 0%{?with_geoip}
-%files module-http_geoip -f files.http_geoip
+%files module-http-geoip -f files.http_geoip
 %endif
-%files module-http_perl -f files.http_perl
-%files module-http_image_filter -f files.http_image_filter
-%files module-http_xslt -f files.http_xslt_filter
+%files module-http-perl -f files.http_perl
+%files module-http-image-filter -f files.http_image_filter
+%files module-http-xslt -f files.http_xslt_filter
 %files module-mail -f files.mail
 %files module-stream -f files.stream
 %if 0%{?with_headers_more}
-%files ext-headers_more -f files.http_headers_more_filter
+%files module-headers-more -f files.http_headers_more_filter
 %endif
 %if 0%{?with_pagespeed}
-%files ext-pagespeed -f files.pagespeed
+%files module-pagespeed -f files.pagespeed
 %endif
 
 %changelog
