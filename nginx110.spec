@@ -76,16 +76,9 @@ BuildRequires:     gperftools-devel
 %endif
 BuildRequires:     openssl-devel
 BuildRequires:     pcre-devel
-%if 0%{?fedora:1} || 0%{?rhel} >= 6
-BuildRequires:     perl-devel
-%else
-BuildRequires:     perl
-%endif
-BuildRequires:     perl(ExtUtils::Embed)
 BuildRequires:     zlib-devel
 Requires:          openssl
 Requires:          pcre
-Requires:          perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $version))
 Requires(pre):     shadow-utils
 Provides:          webserver
 
@@ -141,6 +134,25 @@ Requires:          %{name}%{?_isa} = %{version}-%{release}
 %description module-http_image_filter
 The ngx_http_image_filter_module module is a filter that transforms images in
 JPEG, GIF, and PNG formats.
+
+%package module-http_perl
+Summary: A module to provide perl integration
+Group:             System Environment/Daemons
+# BSD License (two clause)
+# http://www.freebsd.org/copyright/freebsd-license.html
+License:           BSD
+%if 0%{?fedora:1} || 0%{?rhel} >= 6
+BuildRequires:     perl-devel
+%else
+BuildRequires:     perl
+%endif
+BuildRequires:     perl(ExtUtils::Embed)
+Requires:          %{name}%{?_isa} = %{version}-%{release}
+Requires:          perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $version))
+
+%description module-http_perl
+The ngx_http_perl_module module is used to implement location and variable
+handlers in Perl and insert Perl calls into SSI.
 
 %package module-http_xslt
 Summary: A module to transform XML responses using XSLT stylesheets
@@ -283,7 +295,7 @@ export DESTDIR=%{buildroot}
     --with-http_secure_link_module \
     --with-http_degradation_module \
     --with-http_stub_status_module \
-    --with-http_perl_module \
+    --with-http_perl_module=dynamic \
     --with-http_slice_module \
     --with-mail=dynamic \
     --with-mail_ssl_module \
@@ -334,7 +346,7 @@ install -p -d -m 0700 %{buildroot}%{nginx_home_tmp}
 install -p -d -m 0700 %{buildroot}%{nginx_logdir}
 install -p -d -m 0755 %{buildroot}%{nginx_webroot}
 
-for mod in http_image_filter http_xslt_filter mail stream \
+for mod in http_perl http_image_filter http_xslt_filter mail stream \
 %if 0%{?with_geoip}
     http_geoip \
 %endif
@@ -468,6 +480,7 @@ fi
 %if 0%{?with_geoip}
 %files module-http_geoip -f files.http_geoip
 %endif
+%files module-http_perl -f files.http_perl
 %files module-http_image_filter -f files.http_image_filter
 %files module-http_xslt -f files.http_xslt_filter
 %files module-mail -f files.mail
