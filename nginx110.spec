@@ -38,7 +38,7 @@
 
 Name:              nginx110
 Version:           1.10.1
-Release:           0.1%{?dist}
+Release:           0.2%{?dist}
 
 Summary:           A high performance web server and reverse proxy server
 Group:             System Environment/Daemons
@@ -507,7 +507,7 @@ fi
 %endif
 
 %changelog
-* Tue Jun 21 2016 Andy Thompson <andy@webtatic.com> - 1.10.1-0.1
+* Sun Jul 17 2016 Andy Thompson <andy@webtatic.com> - 1.10.1-0.2
 - Fork nginx18 package
 - Extract modules supporting dynamic loading to additional packages
 - Update to 1.10.1
