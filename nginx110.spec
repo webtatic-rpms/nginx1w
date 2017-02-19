@@ -34,7 +34,7 @@
 %endif
 
 %global  headers_more_version 0.32
-%global  pagespeed_version   1.12.34.2
+%global  pagespeed_version   1.11.33.4
 
 Name:              nginx110
 Version:           1.10.3
