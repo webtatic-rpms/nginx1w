@@ -33,8 +33,8 @@
 %global  with_pagespeed      1
 %endif
 
-%global  headers_more_version 0.30
-%global  pagespeed_version   1.10.33.5
+%global  headers_more_version 0.32
+%global  pagespeed_version   1.12.34.2
 
 Name:              nginx110
 Version:           1.10.3
@@ -51,7 +51,7 @@ BuildRoot:         %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n
 Source0:           https://nginx.org/download/nginx-%{version}.tar.gz
 Source1:           https://nginx.org/download/nginx-%{version}.tar.gz.asc
 Source2:           https://github.com/openresty/headers-more-nginx-module/archive/v%{headers_more_version}.tar.gz
-Source3:           https://github.com/pagespeed/ngx_pagespeed/archive/release-%{pagespeed_version}-beta.zip
+Source3:           https://github.com/pagespeed/ngx_pagespeed/archive/v%{pagespeed_version}-beta.tar.gz
 Source4:           https://dl.google.com/dl/page-speed/psol/%{pagespeed_version}.tar.gz
 Source10:          nginx.service
 Source11:          nginx.logrotate
@@ -251,7 +251,7 @@ modify your existing content or workflow.
 %if 0%{?with_pagespeed}
 
 %setup -q -n %{packagename}-%{version} -T -D -a 3
-pushd ngx_pagespeed-release-%{pagespeed_version}-beta
+pushd ngx_pagespeed-%{pagespeed_version}-beta
 tar -xzf %{SOURCE4}
 popd
 
@@ -324,7 +324,7 @@ export DESTDIR=%{buildroot}
     --add-dynamic-module=./headers-more-nginx-module-%{headers_more_version} \
 %endif
 %if 0%{?with_pagespeed}
-    --add-dynamic-module=./ngx_pagespeed-release-%{pagespeed_version}-beta \
+    --add-dynamic-module=./ngx_pagespeed-%{pagespeed_version}-beta \
 %endif
     --with-debug \
     --with-cc-opt="%{optflags} $(pcre-config --cflags)" \
@@ -509,6 +509,7 @@ fi
 %changelog
 * Sun Feb 19 2017 Andy Thompson <andy@webtatic.com> - 1.10.3-1
 - Update to 1.10.3
+- Update external modules to latest versions
 
 * Sun Jul 17 2016 Andy Thompson <andy@webtatic.com> - 1.10.1-0.2
 - Fork nginx18 package
