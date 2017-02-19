@@ -37,8 +37,8 @@
 %global  pagespeed_version   1.10.33.5
 
 Name:              nginx110
-Version:           1.10.1
-Release:           0.2%{?dist}
+Version:           1.10.3
+Release:           1%{?dist}
 
 Summary:           A high performance web server and reverse proxy server
 Group:             System Environment/Daemons
@@ -48,8 +48,8 @@ License:           BSD
 URL:               http://nginx.org/
 BuildRoot:         %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
-Source0:           http://nginx.org/download/nginx-%{version}.tar.gz
-Source1:           http://nginx.org/download/nginx-%{version}.tar.gz.asc
+Source0:           https://nginx.org/download/nginx-%{version}.tar.gz
+Source1:           https://nginx.org/download/nginx-%{version}.tar.gz.asc
 Source2:           https://github.com/openresty/headers-more-nginx-module/archive/v%{headers_more_version}.tar.gz
 Source3:           https://github.com/pagespeed/ngx_pagespeed/archive/release-%{pagespeed_version}-beta.zip
 Source4:           https://dl.google.com/dl/page-speed/psol/%{pagespeed_version}.tar.gz
@@ -507,6 +507,9 @@ fi
 %endif
 
 %changelog
+* Sun Feb 19 2017 Andy Thompson <andy@webtatic.com> - 1.10.3-1
+- Update to 1.10.3
+
 * Sun Jul 17 2016 Andy Thompson <andy@webtatic.com> - 1.10.1-0.2
 - Fork nginx18 package
 - Extract modules supporting dynamic loading to additional packages
