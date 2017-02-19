@@ -36,7 +36,7 @@
 %global  headers_more_version 0.32
 %global  pagespeed_version   1.11.33.4
 
-Name:              nginx110
+Name:              nginx1w
 Version:           1.10.3
 Release:           1%{?dist}
 
