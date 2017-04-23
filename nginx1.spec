@@ -69,7 +69,7 @@ Source104:         50x.html
 # removes -Werror in upstream build scripts.  -Werror conflicts with
 # -D_FORTIFY_SOURCE=2 causing warnings to turn into errors.
 Patch0:            nginx-auto-cc-gcc.patch
-Patch1:            nginx_1_9_15_http2_spdy.patch
+Patch1:            nginx__1.11.11_http2_spdy.patch
 
 %if 0%{?with_gperftools}
 BuildRequires:     gperftools-devel
@@ -509,6 +509,7 @@ fi
 %changelog
 * Sun Apr 23 2017 Andy Thompson <andy@webtatic.com> - 1.12.0-1
 - Update to 1.12.0
+- Update spdy patch to latest Cloudflare repo version
 
 * Sun Feb 19 2017 Andy Thompson <andy@webtatic.com> - 1.10.3-1
 - Update to 1.10.3
