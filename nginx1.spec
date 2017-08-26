@@ -37,7 +37,7 @@
 %global  pagespeed_version   1.11.33.4
 
 Name:              nginx1w
-Version:           1.12.0
+Version:           1.12.1
 Release:           1%{?dist}
 
 Summary:           A high performance web server and reverse proxy server
@@ -507,6 +507,9 @@ fi
 %endif
 
 %changelog
+* Sat Aug 26 2017 Andy Thompson <andy@webtatic.com> - 1.12.1-1
+- Update to 1.12.1
+
 * Sun Apr 23 2017 Andy Thompson <andy@webtatic.com> - 1.12.0-1
 - Update to 1.12.0
 - Update spdy patch to latest Cloudflare repo version
