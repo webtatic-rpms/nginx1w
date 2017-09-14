@@ -507,8 +507,9 @@ fi
 %endif
 
 %changelog
-* Sat Aug 26 2017 Andy Thompson <andy@webtatic.com> - 1.12.1-1
+* Thu Sep 14 2017 Andy Thompson <andy@webtatic.com> - 1.12.1-1
 - Update to 1.12.1
+- rebuild for EL7.4
 
 * Sun Apr 23 2017 Andy Thompson <andy@webtatic.com> - 1.12.0-1
 - Update to 1.12.0
